@@ -2,7 +2,16 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from .forms import CreatePost
 from .models import Post
+from .models import Task
+import json
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.urls import reverse
+
 # Create your views here.
+
+from .serializers import TaskSerializer
 
 def create_post(request):
 
@@ -41,10 +50,10 @@ def detail_post_view(request, slug):
     context = {}
 
     post = get_object_or_404(Post, slug=slug)
+
     context['post'] = post
 
     return render(request, 'detail_post.html', context)
-
 
 def edit_post_view(request, slug):
 
@@ -77,3 +86,52 @@ def edit_post_view(request, slug):
 
     context['form'] = form
     return render(request, '/edit_post.html', context)
+
+@api_view(['GET'])
+def apiOverview(request):
+    api_urls = {
+        'List' : '/task-list/',
+        'Detail View' : '/task-detail/<str:pk>/',
+        'Create' : '/task-create/',
+        'Update' : '/task-update/<str:pk>/',
+        'Delete' : '/task-delete/<str:pk>/',
+    }
+    return JsonResponse (api_urls)
+
+@api_view(['GET'])
+def postList(request):
+    tasks = Post.objects.all()
+    serializer = TaskSerializer(tasks, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def postDetail(request, pk):
+    tasks = Post.objects.get(id=pk)
+    serializer = TaskSerializer(tasks, many=False)
+    return JsonResponse(serializer.data)
+
+@api_view(['POST'])
+def postCreate(request):
+    serializer = TaskSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+
+    return JsonResponse(serializer.data)
+
+@api_view(['POST'])
+def postUpdate(request, pk):
+    tasks = Post.objects.get(id=pk)
+    serializer = TaskSerializer(instance=tasks, data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+
+    return JsonResponse(serializer.data)
+
+@api_view(['DELETE'])
+def postDelete(request, pk):
+    tasks = Task.objects.get(id=pk)
+    tasks.delete()
+
+    return JsonResponse('Item succsesfully delete!')
