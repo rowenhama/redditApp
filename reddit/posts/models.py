@@ -5,6 +5,7 @@ from django.db.models.signals import pre_save, post_delete
 from django.utils.text import slugify
 from django.conf import settings
 from django.dispatch import receiver
+
  
 def upload_location(instance, filename):
 
@@ -21,8 +22,13 @@ class Post(models.Model):
 	date_updated     =models.DateField(auto_now=True,verbose_name="date_updated")
 	slug 	   	   	 =models.SlugField(blank=True, unique=True)
 
-def __str__(self):
+	def __str__(self):
 	 return self.title
+
+class Task(models.Model):
+	title         = models.CharField(max_length = 200)
+	completed     = models.BooleanField(default=False, blank=True, null=True)
+	
 
 @receiver(post_delete)
 def submission_delete(instance,**kwargs):
