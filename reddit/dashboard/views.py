@@ -20,4 +20,6 @@ def about(request):
 def posts(request):
 	return render(request,'posts.html')
 
+def trending(request):
+	return render(request,'trending.html')
 
